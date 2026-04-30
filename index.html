@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team Task Manager | Premium Project Management</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="container">
+    
+    <!-- 1. AUTHENTICATION VIEW -->
+    <!-- Handles Login and Signup transitions -->
+    <div id="auth-section">
+      <div class="flex" style="justify-content: center; margin-bottom: 1rem;">
+        <i data-lucide="layout" style="width: 40px; height: 40px; color: var(--primary);"></i>
+      </div>
+      <h2>Welcome Back</h2>
+      <p>Manage your team and projects efficiently</p>
+      
+      <!-- Login Form -->
+      <div id="login-form">
+        <div class="form-group">
+          <label>Email Address</label>
+          <input id="email" type="email" placeholder="name@company.com" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input id="password" type="password" placeholder="••••••••" />
+        </div>
+        <button onclick="login()">
+          <i data-lucide="log-in" style="width: 18px;"></i> Sign In
+        </button>
+        <p style="margin-top: 1.5rem; font-size: 0.875rem;">
+          Don't have an account? <a href="#" onclick="toggleAuth(false)">Sign Up</a>
+        </p>
+      </div>
+
+      <!-- Signup Form (Hidden by default) -->
+      <div id="signup-form" class="hidden">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input id="signup-name" placeholder="John Doe" />
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input id="signup-email" type="email" placeholder="name@company.com" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input id="signup-password" type="password" placeholder="••••••••" />
+        </div>
+        <div class="form-group">
+          <label>Role</label>
+          <select id="signup-role">
+            <option value="Member">Team Member</option>
+            <option value="Admin">Administrator</option>
+          </select>
+        </div>
+        <button onclick="signup()">
+          <i data-lucide="user-plus" style="width: 18px;"></i> Create Account
+        </button>
+        <p style="margin-top: 1.5rem; font-size: 0.875rem;">
+          Already have an account? <a href="#" onclick="toggleAuth(true)">Sign In</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- 2. MAIN APPLICATION VIEW (SPA Content) -->
+    <!-- This section is revealed only after successful authentication -->
+    <div id="app-section" class="hidden">
+      
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar">
+        <div class="flex mb-2">
+          <i data-lucide="layout" style="color: var(--primary);"></i>
+          <h2 style="margin:0; font-size: 1.25rem;">TaskFlow</h2>
+        </div>
+        
+        <div id="user-info" class="mb-2" style="padding-bottom: 1rem; border-bottom: 1px solid var(--border);">
+          <p id="welcome-name" style="font-weight: 600; font-size: 0.95rem;"></p>
+          <p id="welcome-role" style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;"></p>
+        </div>
+
+        <nav style="display: flex; flex-direction: column; gap: 0.5rem;">
+          <button class="secondary" style="justify-content: flex-start;" onclick="showSection('dashboard-view')">
+            <i data-lucide="pie-chart" style="width: 18px;"></i> Dashboard
+          </button>
+          <button class="secondary" style="justify-content: flex-start;" onclick="showSection('projects-view')">
+            <i data-lucide="folder" style="width: 18px;"></i> Projects
+          </button>
+          <button class="secondary" style="justify-content: flex-start;" onclick="showSection('tasks-view')">
+            <i data-lucide="check-square" style="width: 18px;"></i> My Tasks
+          </button>
+        </nav>
+
+        <div style="margin-top: 2rem;">
+          <button class="secondary" onclick="logout()" style="color: var(--danger); border-color: transparent; background: transparent;">
+            <i data-lucide="log-out" style="width: 18px;"></i> Logout
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <main class="main-content">
+        
+        <!-- Dashboard Section: Real-time metrics -->
+        <div id="dashboard-view" class="view-section">
+          <h3>Overview</h3>
+          <div class="stats-grid">
+            <div class="stat-card stat-total">
+              <span class="label">Total Tasks</span>
+              <span id="stat-total" class="value">0</span>
+            </div>
+            <div class="stat-card stat-progress">
+              <span class="label">In Progress</span>
+              <span id="stat-progress" class="value">0</span>
+            </div>
+            <div class="stat-card stat-done">
+              <span class="label">Completed</span>
+              <span id="stat-done" class="value">0</span>
+            </div>
+            <div class="stat-card stat-overdue">
+              <span class="label">Overdue</span>
+              <span id="stat-overdue" class="value">0</span>
+            </div>
+          </div>
+          
+          <div class="card mt-1">
+            <div class="flex between mb-2">
+              <h3 style="margin:0">Recent Activities</h3>
+              <i data-lucide="clock" style="color: var(--text-muted);"></i>
+            </div>
+            <div id="activity-list" class="activity-list">
+              <!-- Activities will be injected here -->
+              <p style="color: var(--text-muted); font-size: 0.9rem;">Fetching latest updates...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Projects Section: Project Grid -->
+        <div id="projects-view" class="view-section hidden">
+          <div class="flex between mb-2">
+            <h3>Projects</h3>
+            <button id="btn-create-project" style="width: auto; padding: 0.5rem 1rem;" onclick="openModal('project-modal')">
+              <i data-lucide="plus" style="width: 18px;"></i> Create Project
+            </button>
+          </div>
+          <div id="projects-list" class="grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
+            <!-- Dynamic project cards injected here -->
+          </div>
+        </div>
+
+        <!-- Tasks Section: Task Table -->
+        <div id="tasks-view" class="view-section hidden">
+          <div class="flex between mb-2">
+            <h3>Team Tasks</h3>
+            <button style="width: auto; padding: 0.5rem 1rem;" onclick="openModal('task-modal')">
+              <i data-lucide="plus" style="width: 18px;"></i> New Task
+            </button>
+          </div>
+          <div class="card">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Task</th>
+                    <th>Project</th>
+                    <th>Assignee</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="tasks-table-body">
+                  <!-- Dynamic task rows injected here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- 3. MODALS (Popups for creation) -->
+  
+  <!-- New Project Modal -->
+  <div id="project-modal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 50;">
+    <div class="card" style="width: 100%; max-width: 500px;">
+      <div class="flex between mb-2">
+        <h3 style="margin:0">New Project</h3>
+        <button class="secondary" onclick="closeModal('project-modal')" style="width: auto; padding: 0.25rem;">
+          <i data-lucide="x" style="width: 18px;"></i>
+        </button>
+      </div>
+      <div class="form-group">
+        <label>Project Name</label>
+        <input id="new-project-name" placeholder="E.g. Mobile App Redesign" />
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="new-project-desc" rows="3" placeholder="Describe the project goals..."></textarea>
+      </div>
+      <button onclick="createProject()">Create Project</button>
+    </div>
+  </div>
+
+  <!-- New Task Modal -->
+  <div id="task-modal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 50;">
+    <div class="card" style="width: 100%; max-width: 500px;">
+      <div class="flex between mb-2">
+        <h3 style="margin:0">Assign New Task</h3>
+        <button class="secondary" onclick="closeModal('task-modal')" style="width: auto; padding: 0.25rem;">
+          <i data-lucide="x" style="width: 18px;"></i>
+        </button>
+      </div>
+      <div class="form-group">
+        <label>Project</label>
+        <select id="task-project-select"></select>
+      </div>
+      <div class="form-group">
+        <label>Task Title</label>
+        <input id="task-title" placeholder="What needs to be done?" />
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="task-desc" rows="2" placeholder="Task details..."></textarea>
+      </div>
+      <div class="grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label>Assignee</label>
+          <select id="task-assignee-select"></select>
+        </div>
+        <div class="form-group">
+          <label>Due Date</label>
+          <input id="task-due-date" type="date" />
+        </div>
+      </div>
+      <button onclick="createTask()">Create Task</button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="script.js"></script>
+  <script>
+    // Initialize Lucide icons on page load
+    lucide.createIcons();
+  </script>
+</body>
+</html>
